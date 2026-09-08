@@ -28,10 +28,16 @@ import '../../features/notes/credit_debit_notes_screen.dart';
 import '../../widgets/app_shell.dart';
 import '../services/auth_service.dart';
 
+// Exposed so code outside the widget tree (e.g. the window-close handler in
+// main.dart, which needs to show a blocking "saving…" dialog before the
+// native window is destroyed) can reach a valid BuildContext.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     debugLogDiagnostics: false,
     redirect: (context, state) {

@@ -38,78 +38,43 @@ class _AppShellState extends ConsumerState<AppShell> {
     });
   }
 
+  /// A machine with no local data (fresh install, new device, reset
+  /// profile) has nothing to lose from restoring automatically — unlike a
+  /// machine with a corrupted-but-present file (which sync_status_provider
+  /// already excludes from this path; see its comment). So this no longer
+  /// blocks on a "Restore?" click — it just does it, since making someone
+  /// click a button doesn't make the restore any safer. What DOES matter,
+  /// and what a modal doesn't guarantee gets read either, is knowing how
+  /// OLD the restored data is: this server only ever holds what the last
+  /// successful sync sent it, which a real incident showed can silently
+  /// go weeks or months stale. So the one thing this flow is strict about
+  /// is making the backup's age impossible to miss afterward.
   Future<void> _showRestorePrompt() async {
     if (!mounted) return;
     final preview = await ServerSyncService.previewLatestBackup();
     if (!mounted) return;
 
-    final counts = preview?.counts ?? {};
-    const keyCounts = <String, String>{
-      'accounts': 'Accounts',
-      'journals': 'Journal Entries',
-      'vendors': 'Vendors',
-      'bills': 'Bills',
-      'payments': 'Payments',
-    };
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Restore from Server?'),
-        content: SizedBox(
-          width: 400,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'No local data was found on this machine, but a backup exists on the '
-                'sync server. Would you like to restore it now?',
-              ),
-              if (preview != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  'From: ${DateTime.tryParse(preview.syncedAt ?? '')?.toLocal().toString().split('.').first ?? preview.syncedAt ?? 'unknown'}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                ...keyCounts.entries.map((e) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(e.value, style: const TextStyle(fontSize: 13)),
-                          Text('${counts[e.key] ?? 0}',
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    )),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Skip'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Restore'),
-          ),
-        ],
-      ),
-    );
-
     ref.read(syncStatusProvider.notifier).dismissRestorePrompt();
-    if (confirmed == true && mounted) {
-      _runServerRestore();
+
+    if (preview == null) {
+      // Nothing on the server either — genuinely a brand new setup, nothing
+      // to restore. Let the normal empty-state UI take over.
+      return;
     }
+
+    await _runServerRestore(preview);
   }
 
-  Future<void> _runServerRestore() async {
+  Future<void> _runServerRestore(ServerBackupPreview preview) async {
     final messenger = ScaffoldMessenger.of(context);
+    final syncedAt = DateTime.tryParse(preview.syncedAt ?? '');
+    final ageDays = syncedAt != null ? DateTime.now().difference(syncedAt).inDays : null;
+
+    messenger.showSnackBar(SnackBar(
+      content: const Text('No local data found — loading your last backup from the server…'),
+      duration: const Duration(seconds: 3),
+    ));
+
     final db = ref.read(databaseProvider);
     final result = await ServerSyncService.pullAndRestore(db);
     // Files on disk are now correct, but the already-running app's
@@ -117,13 +82,57 @@ class _AppShellState extends ConsumerState<AppShell> {
     // reflects the restore immediately instead of needing a full restart.
     if (result.success) await reloadEverythingAfterRestore(ref.read, ref.invalidate);
     if (!mounted) return;
-    messenger.showSnackBar(SnackBar(
-      content: Text(result.success
-          ? 'Restore complete — data loaded from server.'
-          : 'Restore failed: ${result.error}'),
-      backgroundColor: result.success ? AppColors.success : AppColors.error,
-      duration: const Duration(seconds: 4),
-    ));
+
+    if (!result.success) {
+      messenger.showSnackBar(SnackBar(
+        content: Text('Restore failed: ${result.error}'),
+        backgroundColor: AppColors.error,
+        duration: const Duration(seconds: 6),
+      ));
+      return;
+    }
+
+    final dateLabel = syncedAt != null
+        ? DateFormat('d MMM yyyy, HH:mm').format(syncedAt.toLocal())
+        : (preview.syncedAt ?? 'unknown date');
+
+    // A same-day (or missing-date) backup is unremarkable — a plain
+    // confirmation is enough. Anything older gets a loud, stays-on-screen-
+    // until-dismissed warning instead of a snackbar that vanishes in a few
+    // seconds, because the consequence of not noticing is working an
+    // entire session on books that are missing however many days of real
+    // activity happened since.
+    if (ageDays == null || ageDays < 1) {
+      messenger.showSnackBar(SnackBar(
+        content: Text('Restore complete — data loaded from server backup ($dateLabel).'),
+        backgroundColor: AppColors.success,
+        duration: const Duration(seconds: 4),
+      ));
+      return;
+    }
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('⚠ Restored backup is out of date'),
+        content: SizedBox(
+          width: 420,
+          child: Text(
+            'No local data was found on this machine, so it was restored from the '
+            'last backup the server has: $dateLabel — that\'s $ageDays day${ageDays == 1 ? '' : 's'} old.\n\n'
+            'Anything entered after that date is NOT in this restore. Check with the '
+            'team about what may be missing before relying on these figures.',
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('I understand'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

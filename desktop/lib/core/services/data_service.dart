@@ -1551,8 +1551,14 @@ class JournalsNotifier extends StateNotifier<JournalsState> {
   final ApiClient _apiClient;
   final Ref _ref;
 
+  /// Resolves once the real journals file has finished loading from disk.
+  /// Every read-modify-write below (addEntry/addEntries) MUST await this
+  /// before treating state.entries as the full picture — see addEntries()
+  /// for why.
+  late final Future<void> ready;
+
   JournalsNotifier(this._apiClient, this._ref) : super(JournalsState()) {
-    _initializeData();
+    ready = _initializeData();
   }
 
   Future<void> _initializeData() async {
@@ -1579,7 +1585,14 @@ class JournalsNotifier extends StateNotifier<JournalsState> {
     }
   }
 
-  void addEntry(JournalEntry entry) {
+  Future<void> addEntry(JournalEntry entry) async {
+    // JournalsNotifier starts with an empty in-memory list and loads the
+    // real (possibly 20MB+) file from disk asynchronously in the
+    // background. Building "state.entries + this new entry" before that
+    // load finishes silently overwrites the entire real journals file with
+    // just the new entry — indistinguishable from data loss. Always wait
+    // for the real data first.
+    await ready;
     final updatedEntries = [...state.entries, entry];
     state = state.copyWith(entries: updatedEntries);
 
@@ -1614,9 +1627,21 @@ class JournalsNotifier extends StateNotifier<JournalsState> {
   /// that full read+decode+encode+write cycle dozens of times in rapid
   /// succession on a multi-MB file, which is exactly what made "run
   /// depreciation" look like it corrupted the data afterward.
-  void addEntries(List<JournalEntry> entries) {
+  ///
+  /// That batching fix alone was not enough: the real trigger, reproduced
+  /// live, was Marion running depreciation as her very first action right
+  /// after opening the app — before the existing 22,000+ journal entries
+  /// had finished loading from disk into this notifier's in-memory state
+  /// (which starts empty and loads in the background). addEntries() built
+  /// its "modify" half off that still-empty state.entries and then saved
+  /// the result, silently overwriting the entire real journals file with
+  /// just the handful of new depreciation entries — which is exactly what
+  /// "reports blank, bank balance disappeared" looks like from the app
+  /// side. Always wait for the real data to finish loading first.
+  Future<void> addEntries(List<JournalEntry> entries) async {
     if (entries.isEmpty) return;
 
+    await ready;
     final updatedEntries = [...state.entries, ...entries];
     state = state.copyWith(entries: updatedEntries);
 

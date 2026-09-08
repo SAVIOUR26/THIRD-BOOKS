@@ -122,12 +122,23 @@ class SyncStatusNotifier extends StateNotifier<SyncStatusState> {
   }
 
   /// Detect a fresh install with no local data — trigger automatic restore.
+  ///
+  /// Deliberately checks the file's raw bytes (dataFileHasContent), NOT
+  /// loadJournalEntries().isEmpty. loadJournalEntries() returns an empty
+  /// list both when the file genuinely has nothing AND when the file
+  /// exists but failed to parse (corrupted) — those are very different
+  /// situations. Treating a corrupted-but-present file as "no local data"
+  /// would trigger a restore that silently overwrites it with whatever the
+  /// server last has, which — a real production incident showed — can be
+  /// weeks or months out of date. A genuinely fresh machine has nothing to
+  /// lose from that; a machine with a corrupted file might have real,
+  /// still-partially-recoverable data that a stale restore would destroy.
   Future<void> _checkNeedsInitialRestore() async {
     try {
       final ls = LocalStorageService.instance;
       await ls.initialize();
-      final journals = await ls.loadJournalEntries();
-      if (journals.isEmpty && mounted) {
+      final hasContent = await ls.dataFileHasContent('journals');
+      if (!hasContent && mounted) {
         state = state.copyWith(needsInitialRestore: true);
       }
     } catch (_) {}
