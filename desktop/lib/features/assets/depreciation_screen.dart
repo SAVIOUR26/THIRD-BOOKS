@@ -1037,6 +1037,15 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
     final journalsNotifier = ref.read(journalsProvider.notifier);
     final schedNotifier   = ref.read(depreciationSchedulesProvider.notifier);
     final allEntries = ref.read(journalsProvider).entries;
+    // Collect every period's entry across every asset here, then save ONCE
+    // at the end via addEntries() — calling addEntry() per period, per
+    // asset, meant a full read-modify-write of the entire journals file on
+    // every single one. Harmless on a small file, but with tens of
+    // thousands of existing entries, back-filling several overdue months
+    // across several assets meant dozens of full read+decode+encode+write
+    // cycles of a many-MB file in rapid succession — slow enough to look
+    // like the run had corrupted something afterward.
+    final newEntries = <JournalEntry>[];
     int posted = 0;
     final skipped = <String>[];
 
@@ -1068,7 +1077,7 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
 
         final jeId = const Uuid().v4();
         final isIntangible = _isIntangibleCategory(schedule.assetCategory);
-        journalsNotifier.addEntry(JournalEntry(
+        newEntries.add(JournalEntry(
           id: jeId,
           entryNumber: '${isIntangible ? 'AMRT' : 'DEP'}-${schedule.assetName.replaceAll(' ', '-').toUpperCase()}-$periodLabel',
           date: periodDate,
@@ -1107,6 +1116,9 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
       // Persist the fully-caught-up schedule.
       schedNotifier.updateSchedule(current);
     }
+
+    // One single save for every entry collected across every asset/period.
+    journalsNotifier.addEntries(newEntries);
 
     final message = StringBuffer(
         '$posted depreciation ${posted == 1 ? "entry" : "entries"} posted to Chart of Accounts');

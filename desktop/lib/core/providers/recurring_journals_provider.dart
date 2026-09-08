@@ -83,6 +83,11 @@ class RecurringJournalsNotifier extends StateNotifier<RecurringJournalsState> {
 
     final journalsNotifier = _ref.read(journalsProvider.notifier);
     final now = DateTime.now();
+    // Collect entries across all due templates and save once at the end —
+    // see the same fix in depreciation_screen.dart / bank_reconciliation_
+    // screen.dart for why calling addEntry() per item doesn't scale once
+    // the journals file is large.
+    final newEntries = <JournalEntry>[];
 
     for (final template in due) {
       const uuid = Uuid();
@@ -113,9 +118,11 @@ class RecurringJournalsNotifier extends StateNotifier<RecurringJournalsState> {
         updatedAt: now,
       );
 
-      journalsNotifier.addEntry(entry);
+      newEntries.add(entry);
       await updateTemplate(template.withNextRunAdvanced());
     }
+
+    journalsNotifier.addEntries(newEntries);
   }
 }
 
