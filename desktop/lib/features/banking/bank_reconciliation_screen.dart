@@ -1697,6 +1697,15 @@ class _BankReconciliationScreenState
       final createdSettlementIds = <String>[];
       final now = DateTime.now();
       final createdJeIds = <String>[];
+      // Collect every journal entry created across all three loops below,
+      // then save ONCE at the end via addEntries() — calling addEntry() per
+      // line meant a full read-modify-write of the entire journals file for
+      // every single matched/unmatched line. Harmless on a small file, but
+      // reconciling a real month's statement across many outlets can easily
+      // mean 50-200+ lines, i.e. that many full read+decode+encode+write
+      // cycles of a many-MB file in rapid succession — slow enough to look
+      // like reconciling had corrupted something afterward.
+      final newJournalEntries = <JournalEntry>[];
 
       for (final line in matched) {
         final txType =
@@ -1728,7 +1737,7 @@ class _BankReconciliationScreenState
                   orElse: () => null);
           if (matchedAcct != null) {
             final isCredit = line.amount >= 0;
-            journalsNotifier.addEntry(JournalEntry(
+            newJournalEntries.add(JournalEntry(
               id: jeId,
               entryNumber: 'BANK-REC-${now.millisecondsSinceEpoch}',
               date: line.date,
@@ -1760,7 +1769,7 @@ class _BankReconciliationScreenState
         } else if (line.matchedRecordType == 'bill' &&
             line.matchedRecordId != null) {
           // Bill payment: DR Accounts Payable (164), CR Bank
-          journalsNotifier.addEntry(JournalEntry(
+          newJournalEntries.add(JournalEntry(
             id: jeId,
             entryNumber: 'BANK-BILL-${now.millisecondsSinceEpoch}',
             date: line.date,
@@ -1788,7 +1797,7 @@ class _BankReconciliationScreenState
         } else if (line.matchedRecordType == 'invoice' &&
             line.matchedRecordId != null) {
           // Invoice receipt: DR Bank, CR Accounts Receivable (150)
-          journalsNotifier.addEntry(JournalEntry(
+          newJournalEntries.add(JournalEntry(
             id: jeId,
             entryNumber: 'BANK-INV-${now.millisecondsSinceEpoch}',
             date: line.date,
@@ -1846,7 +1855,7 @@ class _BankReconciliationScreenState
           // Outlets are treated as customers — net revenue owed is AR.
           // When cash arrives from the outlet, we reduce AR and increase Bank.
           final outJeId = const Uuid().v4();
-          journalsNotifier.addEntry(JournalEntry(
+          newJournalEntries.add(JournalEntry(
             id: outJeId,
             entryNumber: 'BANK-OUT-${now.millisecondsSinceEpoch}',
             date: line.date,
@@ -1890,7 +1899,7 @@ class _BankReconciliationScreenState
       for (final line in unmatchedLines) {
         final ujeId = const Uuid().v4();
         final isCredit = line.amount >= 0;
-        journalsNotifier.addEntry(JournalEntry(
+        newJournalEntries.add(JournalEntry(
           id: ujeId,
           entryNumber: 'BANK-SUSPENSE-${now.millisecondsSinceEpoch}',
           date: line.date,
@@ -1918,6 +1927,10 @@ class _BankReconciliationScreenState
         ));
         createdJeIds.add(ujeId);
       }
+
+      // One single save for every journal entry collected across all three
+      // loops above.
+      journalsNotifier.addEntries(newJournalEntries);
 
       // Persist JE IDs against the saved statement so deletion can reverse them.
       if (_savedStatementLocalId != null && createdJeIds.isNotEmpty) {

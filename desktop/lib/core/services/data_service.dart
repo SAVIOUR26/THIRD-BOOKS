@@ -1604,6 +1604,44 @@ class JournalsNotifier extends StateNotifier<JournalsState> {
     }
   }
 
+  /// Adds several journal entries as a single batch — ONE save and ONE
+  /// balance recompute for the whole batch, instead of calling addEntry()
+  /// per entry. That matters a lot once the journal file is large: each
+  /// save re-reads and re-decodes the existing file (to guard against a
+  /// catastrophic-drop save) before re-encoding and writing the full array
+  /// back — fine once, but calling that in a tight loop (e.g. back-filling
+  /// depreciation across many overdue months for many assets) meant doing
+  /// that full read+decode+encode+write cycle dozens of times in rapid
+  /// succession on a multi-MB file, which is exactly what made "run
+  /// depreciation" look like it corrupted the data afterward.
+  void addEntries(List<JournalEntry> entries) {
+    if (entries.isEmpty) return;
+
+    final updatedEntries = [...state.entries, ...entries];
+    state = state.copyWith(entries: updatedEntries);
+
+    _localStorage.saveJournalEntries(updatedEntries);
+
+    for (final entry in entries) {
+      _ref.read(syncServiceProvider.notifier).queueChange(
+        action: SyncAction.create,
+        entityType: SyncEntityType.journalEntry,
+        entityId: entry.id,
+        data: entry.toJson(),
+      );
+    }
+
+    if (entries.any((e) => e.status == JournalEntryStatus.posted)) {
+      _ref.read(accountsProvider.notifier).recomputeBalancesFromJournals(updatedEntries);
+    }
+
+    for (final entry in entries) {
+      if (entry.status == JournalEntryStatus.posted) {
+        _createPayrollTaxJEs(entry);
+      }
+    }
+  }
+
   /// Generates the employer NSSF expense JE (10% of gross salary) for any posted
   /// journal entry that debits account 132 (Salaries). Also notes PAYE and
   /// employee NSSF (5%) amounts in the description for URA filing reference.
