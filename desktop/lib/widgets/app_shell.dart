@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../core/theme/app_theme.dart';
 import '../core/services/auth_service.dart';
 import '../core/services/server_sync_service.dart';
-import '../core/services/data_service.dart' show databaseProvider;
+import '../core/services/data_service.dart' show databaseProvider, journalsProvider, JournalsState;
 import '../core/providers/sync_status_provider.dart';
 import '../features/settings/settings_screen.dart' show reloadEverythingAfterRestore;
 
@@ -35,7 +35,48 @@ class _AppShellState extends ConsumerState<AppShell> {
           _showRestorePrompt();
         }
       });
+      // The journals file can exist with real content but still fail to
+      // load (a write interrupted before saves became atomic — see
+      // local_storage_service.dart). That machine has real local data, so
+      // it must never be silently offered a stale server restore over it
+      // — but it also can't just look like an empty, working app with no
+      // explanation. Surface it plainly instead.
+      ref.listenManual<JournalsState>(journalsProvider, (prev, next) {
+        if (next.loadFailed && !(prev?.loadFailed ?? false)) {
+          _showLoadFailedWarning();
+        }
+      });
     });
+  }
+
+  Future<void> _showLoadFailedWarning() async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('⚠ Local data could not be read'),
+        content: const SizedBox(
+          width: 420,
+          child: Text(
+            'A journals file exists on this machine with real data in it, but it '
+            'could not be loaded — most likely it was left partially written by an '
+            'interrupted save (a crash, a forced close, a power cut).\n\n'
+            'The unreadable file has been preserved (a ".unreadable-…bak" copy next '
+            'to it) so nothing was overwritten or lost. Do NOT restore from the '
+            'server from this screen — that backup may be older than what\'s in this '
+            'file. Use Settings → "Diagnose & Refresh Local Data", or send the '
+            'preserved file to support, before continuing.',
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('I understand'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// A machine with no local data (fresh install, new device, reset
