@@ -138,7 +138,22 @@ class LocalStorageService {
     }
 
     final jsonList = items.map((item) => toJson(item)).toList();
-    await file.writeAsString(jsonEncode(jsonList));
+
+    // Write to a sibling temp file, then rename it over the real one,
+    // instead of writing the real file in place. A plain writeAsString()
+    // is NOT atomic: if the app is killed mid-write — force-closed, a
+    // crash, a power cut, Windows Update rebooting the machine — the file
+    // is left truncated with invalid JSON. The read side then can't
+    // parse it, silently returns "no records", and everything downstream
+    // (reports, balances, the "no local data, restore from server?"
+    // prompt) looks exactly like the data was lost, even though the real
+    // data was never actually gone — just an interrupted write away from
+    // unreadable. A rename onto an existing path is a single filesystem
+    // operation: either the old file is still there, or the new one
+    // fully is — never a half-written mix of both.
+    final tmpFile = File('${file.path}.tmp');
+    await tmpFile.writeAsString(jsonEncode(jsonList));
+    await tmpFile.rename(file.path);
   }
 
   Future<List<T>> loadData<T>(String key, T Function(Map<String, dynamic>) fromJson) async {
@@ -154,8 +169,24 @@ class LocalStorageService {
       final content = await file.readAsString();
       jsonList = jsonDecode(content) as List<dynamic>;
     } catch (e) {
-      // The file itself is unreadable/corrupt JSON — nothing to salvage.
+      // The top-level JSON itself is invalid — most likely a write that
+      // was interrupted partway (before saveData() above made writes
+      // atomic) rather than genuinely empty data. Never just drop the
+      // file and move on: preserve the raw bytes next to it so whatever
+      // is recoverable in them isn't lost to the next normal save
+      // overwriting this path, and log loudly enough that "the file on
+      // disk has real content but the app returned nothing" is
+      // diagnosable instead of looking identical to actual data loss.
       debugPrint('Error loading $key: $e');
+      try {
+        final preserved = File(
+            '${file.path}.unreadable-${DateTime.now().millisecondsSinceEpoch}.bak');
+        await preserved.writeAsBytes(await file.readAsBytes());
+        debugPrint('$key: could not parse — original bytes preserved at ${preserved.path}');
+      } catch (_) {
+        // Preservation is best-effort — never let it block the app from
+        // continuing to start up.
+      }
       return [];
     }
 

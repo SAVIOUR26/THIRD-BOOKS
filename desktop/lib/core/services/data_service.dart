@@ -1528,21 +1528,32 @@ class JournalsState {
   final bool isLoading;
   final String? error;
 
+  /// True when the journals file on disk has real content (more than an
+  /// empty array) but produced zero usable entries on load — i.e. it
+  /// exists but couldn't actually be read, most likely a write that was
+  /// interrupted before saveData() made writes atomic. Distinct from a
+  /// genuinely empty/missing file, which is a normal new install and not
+  /// an error. See JournalsNotifier._initializeData().
+  final bool loadFailed;
+
   JournalsState({
     this.entries = const [],
     this.isLoading = false,
     this.error,
+    this.loadFailed = false,
   });
 
   JournalsState copyWith({
     List<JournalEntry>? entries,
     bool? isLoading,
     String? error,
+    bool? loadFailed,
   }) {
     return JournalsState(
       entries: entries ?? this.entries,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      loadFailed: loadFailed ?? this.loadFailed,
     );
   }
 }
@@ -1567,7 +1578,21 @@ class JournalsNotifier extends StateNotifier<JournalsState> {
     // Load from local storage only (no API)
     try {
       final localEntries = await _localStorage.loadJournalEntries();
-      state = state.copyWith(entries: localEntries, isLoading: false);
+
+      // loadJournalEntries() returns [] both for a genuinely empty/missing
+      // file (normal — a fresh install) and for a file that exists with
+      // real bytes but failed to parse (not normal — the data is still
+      // physically on disk, just unreadable). Only the second case should
+      // ever surface as an error; the file's raw content is the only
+      // reliable way to tell them apart.
+      final failedToLoadRealFile = localEntries.isEmpty &&
+          await _localStorage.dataFileHasContent('journals');
+
+      state = state.copyWith(
+        entries: localEntries,
+        isLoading: false,
+        loadFailed: failedToLoadRealFile,
+      );
       debugPrint('Loaded ${localEntries.length} journal entries from local storage');
     } catch (e) {
       debugPrint('Error loading journals from local storage: $e');
