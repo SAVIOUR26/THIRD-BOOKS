@@ -1033,9 +1033,20 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
     return false;
   }
 
-  void _postDepreciationJournalEntries(List<DepreciationSchedule> due) {
+  Future<void> _postDepreciationJournalEntries(List<DepreciationSchedule> due) async {
     final journalsNotifier = ref.read(journalsProvider.notifier);
     final schedNotifier   = ref.read(depreciationSchedulesProvider.notifier);
+
+    // Wait for the real journal history to finish loading before reading it
+    // for the duplicate-period check below, or building the batch to post.
+    // JournalsNotifier starts empty and loads a possibly 20MB+ file in the
+    // background; reading it too early here previously meant both the
+    // duplicate-check silently saw nothing AND the batch save that follows
+    // overwrote the entire real journals file with just this run's new
+    // entries — reproduced live as "reports blank, bank balance disappeared"
+    // right after running depreciation as the first action after opening.
+    await journalsNotifier.ready;
+    if (!mounted) return;
     final allEntries = ref.read(journalsProvider).entries;
     // Collect every period's entry across every asset here, then save ONCE
     // at the end via addEntries() — calling addEntry() per period, per
