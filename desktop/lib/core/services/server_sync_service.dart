@@ -33,6 +33,25 @@ class ServerSyncResult {
   });
 }
 
+/// Safely pulls a readable message out of a DioException's response body,
+/// regardless of its actual shape. `e.response?.data?['error']` looks
+/// reasonable but throws a NoSuchMethodError if the body isn't a decoded
+/// Map — which happens whenever the server's error response isn't valid
+/// JSON (an HTML error page from the web server, a stray PHP notice
+/// printed ahead of the real JSON, etc.). That throws a NEW, uncaught
+/// exception from inside the catch block handling the ORIGINAL one, so the
+/// app never gets to show "Sync failed: ..." at all — it crashes trying to
+/// even read what went wrong, and the user sees a raw, generic Dio
+/// exception instead, identical no matter what the server actually says.
+String _describeDioError(DioException e) {
+  final data = e.response?.data;
+  if (data is Map && data['error'] is String) return data['error'] as String;
+  if (data is String && data.trim().isNotEmpty) {
+    return data.length > 200 ? '${data.substring(0, 200)}…' : data;
+  }
+  return e.message ?? 'Network error';
+}
+
 class ServerSyncService {
   static const _storage = FlutterSecureStorage();
   static const _urlKey     = 'server_sync_url';
@@ -157,10 +176,7 @@ class ServerSyncService {
     } on TimeoutException catch (e) {
       return ServerSyncResult(success: false, error: e.message);
     } on DioException catch (e) {
-      return ServerSyncResult(
-        success: false,
-        error: e.response?.data?['error'] ?? e.message ?? 'Network error',
-      );
+      return ServerSyncResult(success: false, error: _describeDioError(e));
     } catch (e) {
       return ServerSyncResult(success: false, error: e.toString());
     }
@@ -259,10 +275,7 @@ class ServerSyncService {
     } on TimeoutException catch (e) {
       return ServerSyncResult(success: false, error: e.message);
     } on DioException catch (e) {
-      return ServerSyncResult(
-        success: false,
-        error: e.response?.data ?? e.message ?? 'Network error',
-      );
+      return ServerSyncResult(success: false, error: _describeDioError(e));
     } catch (e) {
       return ServerSyncResult(success: false, error: e.toString());
     }
