@@ -1016,21 +1016,27 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
     return 'Less Accum. Depreciation — Office Equipment';
   }
 
-  /// True if [expenseAccountCode] already has posted debit activity within
+  /// The total posted debit activity against [expenseAccountCode] within
   /// [periodStart]..[periodEnd] — i.e. depreciation/amortization for this
   /// exact month already exists in the ledger, most likely from an earlier
   /// manual journal entry predating this per-asset schedule system. Used to
-  /// stop "Run" from ever posting a duplicate on top of it.
-  bool _periodAlreadyRecorded(
+  /// stop "Run" from ever posting a duplicate on top of it. Returns null if
+  /// nothing matched, so the caller can tell "not recorded" apart from
+  /// "recorded, and it was exactly UGX 0" (which never happens in practice,
+  /// but null is the honest way to express "no match").
+  double? _periodAlreadyRecordedAmount(
       List<JournalEntry> allEntries, String expenseAccountCode, DateTime periodStart, DateTime periodEnd) {
+    double? total;
     for (final e in allEntries) {
       if (e.status != JournalEntryStatus.posted) continue;
       if (e.date.isBefore(periodStart) || e.date.isAfter(periodEnd)) continue;
       for (final line in e.lines) {
-        if (line.accountCode == expenseAccountCode && line.debit > 0) return true;
+        if (line.accountCode == expenseAccountCode && line.debit > 0) {
+          total = (total ?? 0) + line.debit;
+        }
       }
     }
-    return false;
+    return total;
   }
 
   Future<void> _postDepreciationJournalEntries(List<DepreciationSchedule> due) async {
@@ -1077,12 +1083,24 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
 
         // Depreciation for this exact month already exists in the ledger
         // (typically an earlier manual entry) — never post a duplicate on
-        // top of it. Skip this period without touching currentValue, but
-        // still advance past it so the schedule doesn't stay stuck asking
-        // for the same already-covered month forever.
-        if (_periodAlreadyRecorded(allEntries, expenseCode, periodDate, periodEnd)) {
+        // top of it. Skip creating a new entry, but still reduce
+        // currentValue by the amount that WAS already recorded — not by
+        // zero — before advancing past this period.
+        //
+        // Passing 0 here (the previous behaviour) left currentValue too
+        // high by exactly this period's depreciation. That's invisible for
+        // the skipped period itself, but every period AFTER it computes its
+        // declining-balance depreciation off that inflated currentValue —
+        // silently overstating every subsequent period's figure from then
+        // on. This is exactly the shape of bug that shows up as "August
+        // looks wrong right after a July entry got skipped as a duplicate":
+        // one skip with the wrong make-up amount poisons every period after
+        // it, for as long as the asset keeps depreciating.
+        final alreadyRecorded =
+            _periodAlreadyRecordedAmount(allEntries, expenseCode, periodDate, periodEnd);
+        if (alreadyRecorded != null) {
           skipped.add('${schedule.assetName} — $periodLabel');
-          current = current.applyDepreciation(periodEnd, 0);
+          current = current.applyDepreciation(periodEnd, alreadyRecorded);
           continue;
         }
 
