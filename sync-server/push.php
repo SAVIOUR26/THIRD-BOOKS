@@ -6,6 +6,16 @@ require 'config.php';
 
 header('Content-Type: application/json');
 
+// Safety net: this host gives no direct log access, so an unhandled error
+// anywhere below would otherwise reach the app as a blank, undiagnosable
+// 500. Since PHP 7, most fatals (undefined function, type errors, etc.)
+// are catchable \Throwables — surface the real message instead of nothing.
+set_exception_handler(function ($e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Unhandled server error: ' . $e->getMessage()]);
+    exit;
+});
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     die(json_encode(['error' => 'POST required']));
@@ -29,13 +39,30 @@ if (!$body) {
 // with a generous ceiling) into a comfortable one. PHP does not
 // auto-decompress a gzipped request body the way it can auto-compress
 // responses, so this has to be done explicitly.
+//
+// Wrapped in try/catch: calling gzdecode() when this host's PHP build
+// doesn't have the zlib extension throws an uncaught Error (a fatal error,
+// not a warning) — which is exactly what an unexplained, undiagnosable
+// 500 looks like from the app side. Since PHP 7, that kind of fatal is a
+// catchable \Throwable, so turn it into a clear, specific JSON error
+// instead of a blank 500 — this is the fastest way to actually find out
+// what's wrong on a host with no direct log access.
 if (($_SERVER['HTTP_CONTENT_ENCODING'] ?? '') === 'gzip') {
-    $decoded = @gzdecode($body);
-    if ($decoded === false) {
-        http_response_code(400);
-        die(json_encode(['error' => 'Could not decompress gzip body']));
+    try {
+        if (!function_exists('gzdecode')) {
+            http_response_code(500);
+            die(json_encode(['error' => 'Server PHP build is missing the zlib extension (gzdecode unavailable) — cannot decompress gzip uploads']));
+        }
+        $decoded = @gzdecode($body);
+        if ($decoded === false) {
+            http_response_code(400);
+            die(json_encode(['error' => 'Could not decompress gzip body']));
+        }
+        $body = $decoded;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        die(json_encode(['error' => 'Gzip decompression failed: ' . $e->getMessage()]));
     }
-    $body = $decoded;
 }
 
 $data = json_decode($body, true);
