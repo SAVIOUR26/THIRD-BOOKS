@@ -43,7 +43,7 @@ class _JournalsScreenState extends ConsumerState<JournalsScreen> {
 
   List<JournalEntry> get _filteredEntries {
     final journalsState = ref.watch(journalsProvider);
-    return journalsState.entries.where((entry) {
+    final filtered = journalsState.entries.where((entry) {
       final matchesSearch = _searchQuery.isEmpty ||
           entry.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           entry.entryNumber.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -54,6 +54,17 @@ class _JournalsScreenState extends ConsumerState<JournalsScreen> {
               entry.date.isBefore(_dateRange!.end.add(const Duration(days: 1))));
       return matchesSearch && matchesStatus && matchesDate;
     }).toList();
+
+    // Newest first. Entries live in state.entries in whatever order they
+    // were added, not by date — day-to-day entries happen to land roughly
+    // chronological since they're created in real time, but a bulk action
+    // (e.g. back-filling several months of depreciation in one go) appends
+    // all of them to the end of the list at once. Without sorting here,
+    // those brand-new entries land on the very last page instead of the
+    // first — correct, but effectively invisible unless you know to click
+    // all the way to the end.
+    filtered.sort((a, b) => b.date.compareTo(a.date));
+    return filtered;
   }
 
   @override
