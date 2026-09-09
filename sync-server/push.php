@@ -6,30 +6,60 @@ require 'config.php';
 
 header('Content-Type: application/json');
 
+// TEMPORARY diagnostic — a client is hitting a 500 whose actual error text
+// never reaches the app in readable form, which the raw client-side
+// exception shape suggests is a *second* failure: something (most likely a
+// stray PHP notice/warning printed before our JSON, since display_errors
+// can do that even inside a script that otherwise runs fine) is corrupting
+// the response body enough that the client can't even parse out the error
+// message we send. Buffering ALL output and logging anything unexpected
+// lets us see the real cause without needing production credentials
+// shared over chat. Remove this block (and debug_log.txt) once diagnosed —
+// same one-off pattern as the emergency status.php endpoint used earlier.
+ob_start();
+$__debugLog = function ($label, $data = null) {
+    $entry = '[' . date('c') . "] $label";
+    if ($data !== null) $entry .= ': ' . (is_string($data) ? $data : json_encode($data));
+    file_put_contents(__DIR__ . '/debug_log.txt', $entry . "\n", FILE_APPEND);
+};
+$__debugLog('--- push.php request ---');
+$__debugLog('headers', [
+    'content-encoding' => $_SERVER['HTTP_CONTENT_ENCODING'] ?? null,
+    'content-length'   => $_SERVER['CONTENT_LENGTH'] ?? null,
+    'content-type'     => $_SERVER['CONTENT_TYPE'] ?? null,
+]);
+
+// Every exit point goes through this instead of a bare die(json_encode(...))
+// so stray buffered output (a PHP notice/warning printed before our JSON)
+// gets caught and logged instead of silently corrupting the response body.
+$__respond = function (int $code, array $payload) use ($__debugLog) {
+    $stray = ob_get_clean();
+    if ($stray !== '') $__debugLog('STRAY OUTPUT before response', substr($stray, 0, 2000));
+    $__debugLog('RESPONSE ' . $code, $payload);
+    http_response_code($code);
+    echo json_encode($payload);
+    exit;
+};
+
 // Safety net: this host gives no direct log access, so an unhandled error
 // anywhere below would otherwise reach the app as a blank, undiagnosable
 // 500. Since PHP 7, most fatals (undefined function, type errors, etc.)
 // are catchable \Throwables — surface the real message instead of nothing.
-set_exception_handler(function ($e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Unhandled server error: ' . $e->getMessage()]);
-    exit;
+set_exception_handler(function ($e) use ($__respond) {
+    $__respond(500, ['error' => 'Unhandled server error: ' . $e->getMessage()]);
 });
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    die(json_encode(['error' => 'POST required']));
+    $__respond(405, ['error' => 'POST required']);
 }
 
 if (($key = $_SERVER['HTTP_X_API_KEY'] ?? '') !== API_KEY) {
-    http_response_code(401);
-    die(json_encode(['error' => 'Unauthorized']));
+    $__respond(401, ['error' => 'Unauthorized']);
 }
 
 $body = file_get_contents('php://input');
 if (!$body) {
-    http_response_code(400);
-    die(json_encode(['error' => 'Empty body']));
+    $__respond(400, ['error' => 'Empty body']);
 }
 
 // The desktop app gzips the backup before uploading — a real backup is
@@ -39,36 +69,26 @@ if (!$body) {
 // with a generous ceiling) into a comfortable one. PHP does not
 // auto-decompress a gzipped request body the way it can auto-compress
 // responses, so this has to be done explicitly.
-//
-// Wrapped in try/catch: calling gzdecode() when this host's PHP build
-// doesn't have the zlib extension throws an uncaught Error (a fatal error,
-// not a warning) — which is exactly what an unexplained, undiagnosable
-// 500 looks like from the app side. Since PHP 7, that kind of fatal is a
-// catchable \Throwable, so turn it into a clear, specific JSON error
-// instead of a blank 500 — this is the fastest way to actually find out
-// what's wrong on a host with no direct log access.
 if (($_SERVER['HTTP_CONTENT_ENCODING'] ?? '') === 'gzip') {
-    try {
-        if (!function_exists('gzdecode')) {
-            http_response_code(500);
-            die(json_encode(['error' => 'Server PHP build is missing the zlib extension (gzdecode unavailable) — cannot decompress gzip uploads']));
-        }
-        $decoded = @gzdecode($body);
-        if ($decoded === false) {
-            http_response_code(400);
-            die(json_encode(['error' => 'Could not decompress gzip body']));
-        }
-        $body = $decoded;
-    } catch (\Throwable $e) {
-        http_response_code(500);
-        die(json_encode(['error' => 'Gzip decompression failed: ' . $e->getMessage()]));
+    $__debugLog('gzip body received', ['bytes' => strlen($body)]);
+    if (!function_exists('gzdecode')) {
+        $__respond(500, ['error' => 'Server PHP build is missing the zlib extension (gzdecode unavailable) — cannot decompress gzip uploads']);
     }
+    $decoded = @gzdecode($body);
+    if ($decoded === false) {
+        $__respond(400, ['error' => 'Could not decompress gzip body']);
+    }
+    $__debugLog('gzip decoded ok', ['bytes' => strlen($decoded)]);
+    $body = $decoded;
 }
 
 $data = json_decode($body, true);
 if (!$data || ($data['app'] ?? '') !== APP_TAG) {
-    http_response_code(422);
-    die(json_encode(['error' => 'Invalid ThirdBooks backup format']));
+    $__debugLog('json_decode failed or wrong app tag', [
+        'json_last_error' => json_last_error_msg(),
+        'body_head'       => substr($body, 0, 300),
+    ]);
+    $__respond(422, ['error' => 'Invalid ThirdBooks backup format']);
 }
 
 if (!is_dir(BACKUP_DIR)) mkdir(BACKUP_DIR, 0755, true);
@@ -125,7 +145,7 @@ if (!$flagged) {
     }
 }
 
-echo json_encode([
+$__respond(200, [
     'status'    => 'ok',
     'saved_at'  => date('c'),
     'records'   => $data['counts'] ?? [],
