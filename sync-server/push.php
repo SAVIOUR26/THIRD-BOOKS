@@ -22,6 +22,22 @@ if (!$body) {
     die(json_encode(['error' => 'Empty body']));
 }
 
+// The desktop app gzips the backup before uploading — a real backup is
+// mostly thousands of near-identical JSON records, which compresses by
+// roughly 90%+ (measured: 26.3MB -> 1.8MB on a real production journals
+// file), turning a marginal upload (timing out on a slow connection even
+// with a generous ceiling) into a comfortable one. PHP does not
+// auto-decompress a gzipped request body the way it can auto-compress
+// responses, so this has to be done explicitly.
+if (($_SERVER['HTTP_CONTENT_ENCODING'] ?? '') === 'gzip') {
+    $decoded = @gzdecode($body);
+    if ($decoded === false) {
+        http_response_code(400);
+        die(json_encode(['error' => 'Could not decompress gzip body']));
+    }
+    $body = $decoded;
+}
+
 $data = json_decode($body, true);
 if (!$data || ($data['app'] ?? '') !== APP_TAG) {
     http_response_code(422);
