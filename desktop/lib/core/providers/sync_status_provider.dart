@@ -8,6 +8,7 @@ import '../services/data_service.dart' show databaseProvider;
 import '../database/app_database.dart';
 import 'recurring_journals_provider.dart';
 import 'depreciation_schedules_provider.dart';
+import '../migrations/data_corrections.dart';
 
 class SyncStatusState {
   final bool isSyncing;
@@ -91,6 +92,17 @@ class SyncStatusNotifier extends StateNotifier<SyncStatusState> {
     _loginHandled = true;
 
     await _checkNeedsInitialRestore();
+
+    // Run once-off data-correction migrations before anything else touches
+    // local data this session (a server restore, an auto-push, the
+    // recurring/depreciation auto-post checks below). Gated the same way
+    // as the push below: on a machine that still needs its initial restore,
+    // local storage doesn't hold real data yet, so there is nothing correct
+    // to evaluate against yet — this naturally re-runs on the next login,
+    // once _checkNeedsInitialRestore sees the restored file has content.
+    if (!state.needsInitialRestore) {
+      await runDataCorrectionMigrations(_ref);
+    }
 
     // Push immediately on login so a session that closes early still gets
     // backed up, instead of waiting for the first periodic tick.
