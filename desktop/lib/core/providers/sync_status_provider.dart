@@ -7,6 +7,7 @@ import '../services/local_storage_service.dart';
 import '../services/data_service.dart' show databaseProvider;
 import '../database/app_database.dart';
 import 'recurring_journals_provider.dart';
+import 'depreciation_schedules_provider.dart';
 
 class SyncStatusState {
   final bool isSyncing;
@@ -109,6 +110,14 @@ class SyncStatusNotifier extends StateNotifier<SyncStatusState> {
     // Check and auto-post any due recurring journal templates.
     Future.microtask(() {
       if (mounted) _ref.read(recurringJournalsProvider.notifier).checkAndPostDue();
+    });
+
+    // Check and auto-post any depreciation/amortization schedules whose
+    // period has genuinely ended — same automatic, no-manual-run pattern as
+    // recurring journals above, so month-end depreciation posts itself the
+    // next time the app is opened after the month closes.
+    Future.microtask(() {
+      if (mounted) _ref.read(depreciationSchedulesProvider.notifier).checkAndPostDue();
     });
   }
 

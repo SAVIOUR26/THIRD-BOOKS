@@ -6,8 +6,6 @@ import 'package:uuid/uuid.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/providers/asset_drafts_provider.dart';
 import '../../core/providers/depreciation_schedules_provider.dart';
-import '../../core/services/data_service.dart';
-import '../../core/models/journal_entry.dart';
 
 /// Asset Depreciation Screen
 ///
@@ -943,224 +941,29 @@ class _DepreciationScreenState extends ConsumerState<DepreciationScreen> {
     );
   }
 
-  // Returns true for IAS 38 intangible categories (amortized, not depreciated).
-  bool _isIntangibleCategory(String category) {
-    final c = category.toLowerCase();
-    return c == 'software' || c == 'license' || c == 'licence' ||
-           c == 'patent' || c == 'trademark' || c == 'goodwill' ||
-           c == 'intangible';
-  }
-
-  // Expense account for the DR leg: Depreciation (143) for tangibles,
-  // Amortization Expense (180) for intangibles.
-  String _expenseAccountId(String category) =>
-      _isIntangibleCategory(category) ? 'acct-180' : 'acct-143';
-  String _expenseAccountCode(String category) =>
-      _isIntangibleCategory(category) ? '180' : '143';
-  String _expenseAccountName(String category) =>
-      _isIntangibleCategory(category) ? 'Amortization Expense' : 'Depreciation';
-
-  // Maps asset category to the accumulated contra-asset account for the CR leg.
-  // Intangibles → 1800/1810/1820; tangibles → 155/157/159.
-  String _accumDeprecAccountId(String category) {
-    if (_isIntangibleCategory(category)) {
-      final c = category.toLowerCase();
-      if (c == 'software' || c == 'license' || c == 'licence') return 'acct-1810';
-      if (c == 'patent' || c == 'trademark') return 'acct-1820';
-      return 'acct-1800'; // Goodwill / Intangible default
-    }
-    final c = category.toLowerCase();
-    if (c.contains('computer') || c.contains('hardware') ||
-        c.contains('electronic')) {
-      return 'acct-157'; // Less Accum. Depreciation — Computer Equipment
-    }
-    if (c.contains('furniture') || c.contains('fitting')) {
-      return 'acct-159'; // Less Accum. Depreciation — Office Furniture
-    }
-    return 'acct-155'; // Less Accum. Depreciation — Office Equipment (default)
-  }
-
-  String _accumDeprecAccountCode(String category) {
-    if (_isIntangibleCategory(category)) {
-      final c = category.toLowerCase();
-      if (c == 'software' || c == 'license' || c == 'licence') return '1810';
-      if (c == 'patent' || c == 'trademark') return '1820';
-      return '1800';
-    }
-    final c = category.toLowerCase();
-    if (c.contains('computer') || c.contains('hardware') ||
-        c.contains('electronic')) return '157';
-    if (c.contains('furniture') || c.contains('fitting')) return '159';
-    return '155';
-  }
-
-  String _accumDeprecAccountName(String category) {
-    if (_isIntangibleCategory(category)) {
-      final c = category.toLowerCase();
-      if (c == 'software' || c == 'license' || c == 'licence') {
-        return 'Accumulated Amortization - Software';
-      }
-      if (c == 'patent' || c == 'trademark') {
-        return 'Accumulated Amortization - Patents';
-      }
-      return 'Accumulated Amortization';
-    }
-    final c = category.toLowerCase();
-    if (c.contains('computer') || c.contains('hardware') ||
-        c.contains('electronic')) {
-      return 'Less Accum. Depreciation — Computer Equipment';
-    }
-    if (c.contains('furniture') || c.contains('fitting')) {
-      return 'Less Accum. Depreciation — Office Furniture';
-    }
-    return 'Less Accum. Depreciation — Office Equipment';
-  }
-
-  /// The total posted debit activity against [expenseAccountCode] within
-  /// [periodStart]..[periodEnd] — i.e. depreciation/amortization for this
-  /// exact month already exists in the ledger, most likely from an earlier
-  /// manual journal entry predating this per-asset schedule system. Used to
-  /// stop "Run" from ever posting a duplicate on top of it. Returns null if
-  /// nothing matched, so the caller can tell "not recorded" apart from
-  /// "recorded, and it was exactly UGX 0" (which never happens in practice,
-  /// but null is the honest way to express "no match").
-  double? _periodAlreadyRecordedAmount(
-      List<JournalEntry> allEntries, String expenseAccountCode, DateTime periodStart, DateTime periodEnd) {
-    double? total;
-    for (final e in allEntries) {
-      if (e.status != JournalEntryStatus.posted) continue;
-      if (e.date.isBefore(periodStart) || e.date.isAfter(periodEnd)) continue;
-      for (final line in e.lines) {
-        if (line.accountCode == expenseAccountCode && line.debit > 0) {
-          total = (total ?? 0) + line.debit;
-        }
-      }
-    }
-    return total;
-  }
-
+  // Posting math (account mapping, duplicate-period guard, the back-fill
+  // loop itself) now lives in DepreciationSchedulesNotifier.postDepreciationFor()
+  // so the same logic backs both this manual button and the automatic
+  // month-end check run on login (sync_status_provider.dart) — see
+  // depreciation_schedules_provider.dart.
   Future<void> _postDepreciationJournalEntries(List<DepreciationSchedule> due) async {
-    final journalsNotifier = ref.read(journalsProvider.notifier);
-    final schedNotifier   = ref.read(depreciationSchedulesProvider.notifier);
-
-    // Wait for the real journal history to finish loading before reading it
-    // for the duplicate-period check below, or building the batch to post.
-    // JournalsNotifier starts empty and loads a possibly 20MB+ file in the
-    // background; reading it too early here previously meant both the
-    // duplicate-check silently saw nothing AND the batch save that follows
-    // overwrote the entire real journals file with just this run's new
-    // entries — reproduced live as "reports blank, bank balance disappeared"
-    // right after running depreciation as the first action after opening.
-    await journalsNotifier.ready;
+    final result = await ref
+        .read(depreciationSchedulesProvider.notifier)
+        .postDepreciationFor(due);
     if (!mounted) return;
-    final allEntries = ref.read(journalsProvider).entries;
-    // Collect every period's entry across every asset here, then save ONCE
-    // at the end via addEntries() — calling addEntry() per period, per
-    // asset, meant a full read-modify-write of the entire journals file on
-    // every single one. Harmless on a small file, but with tens of
-    // thousands of existing entries, back-filling several overdue months
-    // across several assets meant dozens of full read+decode+encode+write
-    // cycles of a many-MB file in rapid succession — slow enough to look
-    // like the run had corrupted something afterward.
-    final newEntries = <JournalEntry>[];
-    int posted = 0;
-    final skipped = <String>[];
-
-    for (final schedule in due) {
-      DepreciationSchedule current = schedule;
-      final expenseCode = _expenseAccountCode(schedule.assetCategory);
-
-      // Back-fill every overdue period, each with its own JE dated at the period.
-      // Pro-rata: first period covers purchase date → end of that month;
-      // subsequent periods cover the full calendar month (1st → last day).
-      while (current.isDue) {
-        final periodDate = current.nextRunDate;
-        final periodEnd  = DepreciationSchedule.periodEndDate(current.period, periodDate);
-        final amount     = current.depreciationForPeriod(periodDate, periodEnd);
-        if (amount <= 0) break;
-
-        final periodLabel = DateFormat('MMM yyyy').format(periodDate);
-
-        // Depreciation for this exact month already exists in the ledger
-        // (typically an earlier manual entry) — never post a duplicate on
-        // top of it. Skip creating a new entry, but still reduce
-        // currentValue by the amount that WAS already recorded — not by
-        // zero — before advancing past this period.
-        //
-        // Passing 0 here (the previous behaviour) left currentValue too
-        // high by exactly this period's depreciation. That's invisible for
-        // the skipped period itself, but every period AFTER it computes its
-        // declining-balance depreciation off that inflated currentValue —
-        // silently overstating every subsequent period's figure from then
-        // on. This is exactly the shape of bug that shows up as "August
-        // looks wrong right after a July entry got skipped as a duplicate":
-        // one skip with the wrong make-up amount poisons every period after
-        // it, for as long as the asset keeps depreciating.
-        final alreadyRecorded =
-            _periodAlreadyRecordedAmount(allEntries, expenseCode, periodDate, periodEnd);
-        if (alreadyRecorded != null) {
-          skipped.add('${schedule.assetName} — $periodLabel');
-          current = current.applyDepreciation(periodEnd, alreadyRecorded);
-          continue;
-        }
-
-        final jeId = const Uuid().v4();
-        final isIntangible = _isIntangibleCategory(schedule.assetCategory);
-        newEntries.add(JournalEntry(
-          id: jeId,
-          entryNumber: '${isIntangible ? 'AMRT' : 'DEP'}-${schedule.assetName.replaceAll(' ', '-').toUpperCase()}-$periodLabel',
-          date: periodDate,
-          description: '${isIntangible ? 'Amortization' : 'Depreciation'}: ${schedule.assetName} — $periodLabel',
-          reference: '${isIntangible ? 'AMRT' : 'DEPR'}-${schedule.id.substring(0, 6).toUpperCase()}',
-          status: JournalEntryStatus.posted,
-          lines: [
-            JournalLine(
-              id: '$jeId-1',
-              journalEntryId: jeId,
-              accountId: _expenseAccountId(schedule.assetCategory),
-              accountCode: expenseCode,
-              accountName: _expenseAccountName(schedule.assetCategory),
-              debit: amount,
-              credit: 0,
-            ),
-            JournalLine(
-              id: '$jeId-2',
-              journalEntryId: jeId,
-              accountId: _accumDeprecAccountId(schedule.assetCategory),
-              accountCode: _accumDeprecAccountCode(schedule.assetCategory),
-              accountName: _accumDeprecAccountName(schedule.assetCategory),
-              debit: 0,
-              credit: amount,
-            ),
-          ],
-          createdAt: periodDate,
-          updatedAt: periodDate,
-        ));
-
-        // Store periodEnd as lastRunDate → nextRunDate becomes 1st of next month.
-        current = current.applyDepreciation(periodEnd, amount);
-        posted++;
-      }
-
-      // Persist the fully-caught-up schedule.
-      schedNotifier.updateSchedule(current);
-    }
-
-    // One single save for every entry collected across every asset/period.
-    journalsNotifier.addEntries(newEntries);
 
     final message = StringBuffer(
-        '$posted depreciation ${posted == 1 ? "entry" : "entries"} posted to Chart of Accounts');
-    if (skipped.isNotEmpty) {
-      final shown = skipped.take(4).join(', ');
-      final more = skipped.length > 4 ? ' and ${skipped.length - 4} more' : '';
-      message.write('. Skipped ${skipped.length} period(s) already recorded elsewhere: $shown$more.');
+        '${result.posted} depreciation ${result.posted == 1 ? "entry" : "entries"} posted to Chart of Accounts');
+    if (result.skipped.isNotEmpty) {
+      final shown = result.skipped.take(4).join(', ');
+      final more = result.skipped.length > 4 ? ' and ${result.skipped.length - 4} more' : '';
+      message.write('. Skipped ${result.skipped.length} period(s) already recorded elsewhere: $shown$more.');
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message.toString()),
-        backgroundColor: skipped.isEmpty ? AppColors.success : AppColors.warning,
+        backgroundColor: result.skipped.isEmpty ? AppColors.success : AppColors.warning,
         duration: const Duration(seconds: 6),
       ),
     );
