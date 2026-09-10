@@ -1692,23 +1692,6 @@ class JournalsNotifier extends StateNotifier<JournalsState> {
     }
   }
 
-  /// Removes journal entries by id. Not exposed anywhere in the UI — journal
-  /// entries are otherwise only ever added or reversed, never deleted. Used
-  /// solely by one-time data-correction migrations (see core/migrations/)
-  /// to retract specific, individually-identified wrong entries left behind
-  /// by an earlier bug, once the corrected replacement entries are known.
-  Future<void> removeEntries(Set<String> ids) async {
-    if (ids.isEmpty) return;
-    await ready;
-    final updatedEntries =
-        state.entries.where((e) => !ids.contains(e.id)).toList();
-    if (updatedEntries.length == state.entries.length) return; // none matched
-
-    state = state.copyWith(entries: updatedEntries);
-    _localStorage.saveJournalEntries(updatedEntries);
-    _ref.read(accountsProvider.notifier).recomputeBalancesFromJournals(updatedEntries);
-  }
-
   /// Generates the employer NSSF expense JE (10% of gross salary) for any posted
   /// journal entry that debits account 132 (Salaries). Also notes PAYE and
   /// employee NSSF (5%) amounts in the description for URA filing reference.

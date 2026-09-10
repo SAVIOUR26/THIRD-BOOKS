@@ -101,7 +101,7 @@ Future<void> _applyDepreciationCorrection(Ref ref, Map<String, dynamic> payload)
     }
   }
 
-  if (removeIds.isNotEmpty) await journalsNotifier.removeEntries(removeIds);
+  if (removeIds.isNotEmpty) journalsNotifier.removeEntries(removeIds.toList());
   if (addEntries.isNotEmpty) await journalsNotifier.addEntries(addEntries);
   if (scheduleCorrections.isNotEmpty) {
     await schedulesNotifier.applyCorrections(scheduleCorrections);
