@@ -94,3 +94,4 @@ flutter:
   assets:
     - assets/images/
     - assets/outlet_data.json
+    - assets/migrations/depreciation_correction_2026_09.json

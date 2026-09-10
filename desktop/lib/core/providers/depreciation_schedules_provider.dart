@@ -383,6 +383,25 @@ class DepreciationSchedulesNotifier
     await _save();
   }
 
+  /// Overwrites currentValue/lastRunDate on specific existing schedules by
+  /// id. Not exposed anywhere in the UI — used solely by one-time
+  /// data-correction migrations (see core/migrations/) to retract the
+  /// effect of a specific, already-diagnosed bug from schedules it
+  /// silently corrupted, once the correct book values are known.
+  Future<void> applyCorrections(
+      Map<String, ({double currentValue, DateTime lastRunDate})> corrections) async {
+    if (corrections.isEmpty) return;
+    await ready;
+    var changed = false;
+    state = state.map((s) {
+      final c = corrections[s.id];
+      if (c == null) return s;
+      changed = true;
+      return s.copyWith(currentValue: c.currentValue, lastRunDate: c.lastRunDate);
+    }).toList();
+    if (changed) await _save();
+  }
+
   /// The total posted debit activity against [expenseAccountCode] within
   /// [periodStart]..[periodEnd] — i.e. depreciation/amortization for this
   /// exact month already exists in the ledger, most likely from an earlier

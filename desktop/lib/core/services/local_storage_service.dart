@@ -386,6 +386,35 @@ class LocalStorageService {
   }
 
   // ============================================================================
+  // One-time data-correction migrations
+  // ============================================================================
+
+  /// Ids of one-time data-correction migrations (see core/migrations/)
+  /// already applied on this machine — checked before running each one so
+  /// a fix is never re-applied on top of itself.
+  Future<Set<String>> getAppliedMigrations() async {
+    await initialize();
+    final file = _getFile('system_migrations');
+    if (!await file.exists()) return {};
+    try {
+      final content = await file.readAsString();
+      final list = jsonDecode(content) as List<dynamic>;
+      return list.map((e) => e.toString()).toSet();
+    } catch (e) {
+      debugPrint('Error loading system_migrations: $e');
+      return {};
+    }
+  }
+
+  Future<void> markMigrationApplied(String id) async {
+    await initialize();
+    final applied = await getAppliedMigrations();
+    applied.add(id);
+    final file = _getFile('system_migrations');
+    await file.writeAsString(jsonEncode(applied.toList()));
+  }
+
+  // ============================================================================
   // Clear All Data
   // ============================================================================
 

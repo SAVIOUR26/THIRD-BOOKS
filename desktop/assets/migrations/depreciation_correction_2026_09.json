@@ -1,0 +1,1102 @@
+{
+  "id": "2026-09-depreciation-correction",
+  "description": "One-time correction of July/August 2026 depreciation/amortization entries and schedule book values, tied to a specific data-corruption incident traced to 2 Sept 2026. Safe no-op on any install that does not match the exact known-bad state below by schedule id and current value.",
+  "removeJournalEntryIds": [
+    "4846dbbb-10df-4f0a-b8a5-a4ececbf10c9",
+    "4f4e8c74-e41e-4272-8077-13495b1bc3dd",
+    "5012d37f-54ac-4a48-827c-dadefde656b0",
+    "51a2256d-4513-4244-963d-653368b34e2a",
+    "607838e4-4e24-42f7-a0da-39824cd7252a",
+    "6e844cde-3452-48e6-b778-60d28baf368f",
+    "8e4d1015-e05d-4041-bbd2-beb9bdca3d56",
+    "ab785039-a43a-4e0d-b1c4-46cbdd2b4a64",
+    "ba08f592-53f8-4036-ba15-86633bd22fdb",
+    "c4ab25f3-a9d9-43ef-bda2-49d45c173dd7",
+    "c998e672-c996-4e9a-be15-8ef85f9efa8c",
+    "dfb53e63-f56e-4923-8a15-4bc7d4026824",
+    "e85c6984-2200-496f-92aa-43193e0431e5"
+  ],
+  "addJournalEntries": [
+    {
+      "id": "9ca1ba70-0d6c-41e6-becc-e232111f046c",
+      "entry_number": "AMRT-THIRDBOOKS-SOFTWARE-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Amortization: Thirdbooks Software \u2014 Jul 2026",
+      "reference": "AMRT-B39F9A",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "9ca1ba70-0d6c-41e6-becc-e232111f046c-1",
+          "journal_entry_id": "9ca1ba70-0d6c-41e6-becc-e232111f046c",
+          "account_id": "acct-180",
+          "account_name": "Amortization Expense",
+          "account_code": "180",
+          "debit": 113230.68,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "9ca1ba70-0d6c-41e6-becc-e232111f046c-2",
+          "journal_entry_id": "9ca1ba70-0d6c-41e6-becc-e232111f046c",
+          "account_id": "acct-1810",
+          "account_name": "Accumulated Amortization - Software",
+          "account_code": "1810",
+          "debit": 0,
+          "credit": 113230.68,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "f5aaadd9-3d0d-471f-b5da-8b771bba4a8f",
+      "entry_number": "AMRT-THIRDBOOKS-SOFTWARE-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Amortization: Thirdbooks Software \u2014 Aug 2026",
+      "reference": "AMRT-B39F9A",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "f5aaadd9-3d0d-471f-b5da-8b771bba4a8f-1",
+          "journal_entry_id": "f5aaadd9-3d0d-471f-b5da-8b771bba4a8f",
+          "account_id": "acct-180",
+          "account_name": "Amortization Expense",
+          "account_code": "180",
+          "debit": 113230.68,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "f5aaadd9-3d0d-471f-b5da-8b771bba4a8f-2",
+          "journal_entry_id": "f5aaadd9-3d0d-471f-b5da-8b771bba4a8f",
+          "account_id": "acct-1810",
+          "account_name": "Accumulated Amortization - Software",
+          "account_code": "1810",
+          "debit": 0,
+          "credit": 113230.68,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "89a1bbb7-1f31-4daa-bab6-f40daa93c606",
+      "entry_number": "DEP-AIR-CONDITIONER-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Air Conditioner \u2014 Jul 2026",
+      "reference": "DEPR-15DECC",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "89a1bbb7-1f31-4daa-bab6-f40daa93c606-1",
+          "journal_entry_id": "89a1bbb7-1f31-4daa-bab6-f40daa93c606",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 47946.98,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "89a1bbb7-1f31-4daa-bab6-f40daa93c606-2",
+          "journal_entry_id": "89a1bbb7-1f31-4daa-bab6-f40daa93c606",
+          "account_id": "acct-155",
+          "account_name": "Less Accum. Depreciation \u2014 Office Equipment",
+          "account_code": "155",
+          "debit": 0,
+          "credit": 47946.98,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "3de44485-6a7f-4bdb-9880-14d5a6f4e231",
+      "entry_number": "DEP-AIR-CONDITIONER-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Air Conditioner \u2014 Aug 2026",
+      "reference": "DEPR-15DECC",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "3de44485-6a7f-4bdb-9880-14d5a6f4e231-1",
+          "journal_entry_id": "3de44485-6a7f-4bdb-9880-14d5a6f4e231",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 47132.54,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "3de44485-6a7f-4bdb-9880-14d5a6f4e231-2",
+          "journal_entry_id": "3de44485-6a7f-4bdb-9880-14d5a6f4e231",
+          "account_id": "acct-155",
+          "account_name": "Less Accum. Depreciation \u2014 Office Equipment",
+          "account_code": "155",
+          "debit": 0,
+          "credit": 47132.54,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "ab367a9d-de3b-44bc-93d8-e8fd2bc8a6aa",
+      "entry_number": "DEP-4-SEATER-WORKSTATION-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: 4 Seater workstation \u2014 Jul 2026",
+      "reference": "DEPR-161D93",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "ab367a9d-de3b-44bc-93d8-e8fd2bc8a6aa-1",
+          "journal_entry_id": "ab367a9d-de3b-44bc-93d8-e8fd2bc8a6aa",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 40127.23,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "ab367a9d-de3b-44bc-93d8-e8fd2bc8a6aa-2",
+          "journal_entry_id": "ab367a9d-de3b-44bc-93d8-e8fd2bc8a6aa",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 40127.23,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "2238482a-580b-4569-9c93-6b95efb9e0e3",
+      "entry_number": "DEP-4-SEATER-WORKSTATION-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: 4 Seater workstation \u2014 Aug 2026",
+      "reference": "DEPR-161D93",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "2238482a-580b-4569-9c93-6b95efb9e0e3-1",
+          "journal_entry_id": "2238482a-580b-4569-9c93-6b95efb9e0e3",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 39445.62,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "2238482a-580b-4569-9c93-6b95efb9e0e3-2",
+          "journal_entry_id": "2238482a-580b-4569-9c93-6b95efb9e0e3",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 39445.62,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "65bd3fc4-9cb0-412b-ab7a-3aacf1bf1326",
+      "entry_number": "DEP-HIGH-BACK-MESH-CHAIR-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: High Back Mesh chair \u2014 Jul 2026",
+      "reference": "DEPR-1C0BC2",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "65bd3fc4-9cb0-412b-ab7a-3aacf1bf1326-1",
+          "journal_entry_id": "65bd3fc4-9cb0-412b-ab7a-3aacf1bf1326",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 11235.62,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "65bd3fc4-9cb0-412b-ab7a-3aacf1bf1326-2",
+          "journal_entry_id": "65bd3fc4-9cb0-412b-ab7a-3aacf1bf1326",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 11235.62,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "70fe75e2-e227-4856-9fda-07a9e0cb35bc",
+      "entry_number": "DEP-HIGH-BACK-MESH-CHAIR-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: High Back Mesh chair \u2014 Aug 2026",
+      "reference": "DEPR-1C0BC2",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "70fe75e2-e227-4856-9fda-07a9e0cb35bc-1",
+          "journal_entry_id": "70fe75e2-e227-4856-9fda-07a9e0cb35bc",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 11044.77,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "70fe75e2-e227-4856-9fda-07a9e0cb35bc-2",
+          "journal_entry_id": "70fe75e2-e227-4856-9fda-07a9e0cb35bc",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 11044.77,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "861a28cf-a118-4cca-a854-7dfa4791e124",
+      "entry_number": "DEP-TRAINING-CHAIR-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Training Chair \u2014 Jul 2026",
+      "reference": "DEPR-387377",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "861a28cf-a118-4cca-a854-7dfa4791e124-1",
+          "journal_entry_id": "861a28cf-a118-4cca-a854-7dfa4791e124",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 8346.46,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "861a28cf-a118-4cca-a854-7dfa4791e124-2",
+          "journal_entry_id": "861a28cf-a118-4cca-a854-7dfa4791e124",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 8346.46,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "a8bb6d67-0f6e-45b7-9eda-c8141387dd56",
+      "entry_number": "DEP-TRAINING-CHAIR-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Training Chair \u2014 Aug 2026",
+      "reference": "DEPR-387377",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "a8bb6d67-0f6e-45b7-9eda-c8141387dd56-1",
+          "journal_entry_id": "a8bb6d67-0f6e-45b7-9eda-c8141387dd56",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 8204.69,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "a8bb6d67-0f6e-45b7-9eda-c8141387dd56-2",
+          "journal_entry_id": "a8bb6d67-0f6e-45b7-9eda-c8141387dd56",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 8204.69,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "6aca5125-a643-4c57-9abd-fd1d4eba1af8",
+      "entry_number": "DEP-LENOVO-THINKPAD-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Lenovo Thinkpad \u2014 Jul 2026",
+      "reference": "DEPR-4FB30B",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "6aca5125-a643-4c57-9abd-fd1d4eba1af8-1",
+          "journal_entry_id": "6aca5125-a643-4c57-9abd-fd1d4eba1af8",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 142720.3,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "6aca5125-a643-4c57-9abd-fd1d4eba1af8-2",
+          "journal_entry_id": "6aca5125-a643-4c57-9abd-fd1d4eba1af8",
+          "account_id": "acct-157",
+          "account_name": "Less Accum. Depreciation \u2014 Computer Equipment",
+          "account_code": "157",
+          "debit": 0,
+          "credit": 142720.3,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "33f8982f-1209-4ee4-b072-80a87cdb4e10",
+      "entry_number": "DEP-LENOVO-THINKPAD-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Lenovo Thinkpad \u2014 Aug 2026",
+      "reference": "DEPR-4FB30B",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "33f8982f-1209-4ee4-b072-80a87cdb4e10-1",
+          "journal_entry_id": "33f8982f-1209-4ee4-b072-80a87cdb4e10",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 137871.72,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "33f8982f-1209-4ee4-b072-80a87cdb4e10-2",
+          "journal_entry_id": "33f8982f-1209-4ee4-b072-80a87cdb4e10",
+          "account_id": "acct-157",
+          "account_name": "Less Accum. Depreciation \u2014 Computer Equipment",
+          "account_code": "157",
+          "debit": 0,
+          "credit": 137871.72,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "2c53d49b-7905-42de-ad3f-b65a16ac1b8e",
+      "entry_number": "DEP-RECEPTION-DESK-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Reception Desk \u2014 Jul 2026",
+      "reference": "DEPR-661F3E",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "2c53d49b-7905-42de-ad3f-b65a16ac1b8e-1",
+          "journal_entry_id": "2c53d49b-7905-42de-ad3f-b65a16ac1b8e",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 28891.6,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "2c53d49b-7905-42de-ad3f-b65a16ac1b8e-2",
+          "journal_entry_id": "2c53d49b-7905-42de-ad3f-b65a16ac1b8e",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 28891.6,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "93930abc-a1c6-42e2-b00f-b7d98c774079",
+      "entry_number": "DEP-RECEPTION-DESK-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Reception Desk \u2014 Aug 2026",
+      "reference": "DEPR-661F3E",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "93930abc-a1c6-42e2-b00f-b7d98c774079-1",
+          "journal_entry_id": "93930abc-a1c6-42e2-b00f-b7d98c774079",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 28400.84,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "93930abc-a1c6-42e2-b00f-b7d98c774079-2",
+          "journal_entry_id": "93930abc-a1c6-42e2-b00f-b7d98c774079",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 28400.84,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "f0b9da80-38b5-4083-b0a0-c41175f2d4a7",
+      "entry_number": "DEP-ACCESS-CONTROL-SYSTEM-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Access Control System \u2014 Jul 2026",
+      "reference": "DEPR-87BC92",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "f0b9da80-38b5-4083-b0a0-c41175f2d4a7-1",
+          "journal_entry_id": "f0b9da80-38b5-4083-b0a0-c41175f2d4a7",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 21063.65,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "f0b9da80-38b5-4083-b0a0-c41175f2d4a7-2",
+          "journal_entry_id": "f0b9da80-38b5-4083-b0a0-c41175f2d4a7",
+          "account_id": "acct-155",
+          "account_name": "Less Accum. Depreciation \u2014 Office Equipment",
+          "account_code": "155",
+          "debit": 0,
+          "credit": 21063.65,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "8d02e1f4-20e2-4167-8e18-5bc7f4b176c5",
+      "entry_number": "DEP-ACCESS-CONTROL-SYSTEM-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Access Control System \u2014 Aug 2026",
+      "reference": "DEPR-87BC92",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "8d02e1f4-20e2-4167-8e18-5bc7f4b176c5-1",
+          "journal_entry_id": "8d02e1f4-20e2-4167-8e18-5bc7f4b176c5",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 20705.85,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "8d02e1f4-20e2-4167-8e18-5bc7f4b176c5-2",
+          "journal_entry_id": "8d02e1f4-20e2-4167-8e18-5bc7f4b176c5",
+          "account_id": "acct-155",
+          "account_name": "Less Accum. Depreciation \u2014 Office Equipment",
+          "account_code": "155",
+          "debit": 0,
+          "credit": 20705.85,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "ae0d7137-79a9-482e-939c-b042cbc277b1",
+      "entry_number": "DEP-HP-ELITEBOOK-LAPTOP-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: HP Elitebook Laptop \u2014 Jul 2026",
+      "reference": "DEPR-C3954F",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "ae0d7137-79a9-482e-939c-b042cbc277b1-1",
+          "journal_entry_id": "ae0d7137-79a9-482e-939c-b042cbc277b1",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 46072.43,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "ae0d7137-79a9-482e-939c-b042cbc277b1-2",
+          "journal_entry_id": "ae0d7137-79a9-482e-939c-b042cbc277b1",
+          "account_id": "acct-157",
+          "account_name": "Less Accum. Depreciation \u2014 Computer Equipment",
+          "account_code": "157",
+          "debit": 0,
+          "credit": 46072.43,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "6c12dd95-ac72-434a-873a-6f5f89273f18",
+      "entry_number": "DEP-HP-ELITEBOOK-LAPTOP-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: HP Elitebook Laptop \u2014 Aug 2026",
+      "reference": "DEPR-C3954F",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "6c12dd95-ac72-434a-873a-6f5f89273f18-1",
+          "journal_entry_id": "6c12dd95-ac72-434a-873a-6f5f89273f18",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 44507.23,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "6c12dd95-ac72-434a-873a-6f5f89273f18-2",
+          "journal_entry_id": "6c12dd95-ac72-434a-873a-6f5f89273f18",
+          "account_id": "acct-157",
+          "account_name": "Less Accum. Depreciation \u2014 Computer Equipment",
+          "account_code": "157",
+          "debit": 0,
+          "credit": 44507.23,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "75ccf105-738d-41f5-9aaf-9c7daa1a9620",
+      "entry_number": "DEP-OFFICE-PARTITIONS-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Office Partitions \u2014 Jul 2026",
+      "reference": "DEPR-DCEF04",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "75ccf105-738d-41f5-9aaf-9c7daa1a9620-1",
+          "journal_entry_id": "75ccf105-738d-41f5-9aaf-9c7daa1a9620",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 251981.2,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "75ccf105-738d-41f5-9aaf-9c7daa1a9620-2",
+          "journal_entry_id": "75ccf105-738d-41f5-9aaf-9c7daa1a9620",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 251981.2,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "423e19a4-bcd5-4a1b-99d7-59bc7d183779",
+      "entry_number": "DEP-OFFICE-PARTITIONS-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Office Partitions \u2014 Aug 2026",
+      "reference": "DEPR-DCEF04",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "423e19a4-bcd5-4a1b-99d7-59bc7d183779-1",
+          "journal_entry_id": "423e19a4-bcd5-4a1b-99d7-59bc7d183779",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 247700.97,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "423e19a4-bcd5-4a1b-99d7-59bc7d183779-2",
+          "journal_entry_id": "423e19a4-bcd5-4a1b-99d7-59bc7d183779",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 247700.97,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "30e73e41-72e3-42a7-b867-54cd7976d979",
+      "entry_number": "DEP-PRINTER-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Printer \u2014 Jul 2026",
+      "reference": "DEPR-EAE1A8",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "30e73e41-72e3-42a7-b867-54cd7976d979-1",
+          "journal_entry_id": "30e73e41-72e3-42a7-b867-54cd7976d979",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 16130.01,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "30e73e41-72e3-42a7-b867-54cd7976d979-2",
+          "journal_entry_id": "30e73e41-72e3-42a7-b867-54cd7976d979",
+          "account_id": "acct-155",
+          "account_name": "Less Accum. Depreciation \u2014 Office Equipment",
+          "account_code": "155",
+          "debit": 0,
+          "credit": 16130.01,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "1b2e64ee-e138-42e6-bf3e-1399e820af49",
+      "entry_number": "DEP-PRINTER-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Printer \u2014 Aug 2026",
+      "reference": "DEPR-EAE1A8",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "1b2e64ee-e138-42e6-bf3e-1399e820af49-1",
+          "journal_entry_id": "1b2e64ee-e138-42e6-bf3e-1399e820af49",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 15856.02,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "1b2e64ee-e138-42e6-bf3e-1399e820af49-2",
+          "journal_entry_id": "1b2e64ee-e138-42e6-bf3e-1399e820af49",
+          "account_id": "acct-155",
+          "account_name": "Less Accum. Depreciation \u2014 Office Equipment",
+          "account_code": "155",
+          "debit": 0,
+          "credit": 15856.02,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "94418777-b188-4dd7-8396-c904f0dfb186",
+      "entry_number": "DEP-MID-BACK-MESH-CHAIR-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Mid Back Mesh chair \u2014 Jul 2026",
+      "reference": "DEPR-F06491",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "94418777-b188-4dd7-8396-c904f0dfb186-1",
+          "journal_entry_id": "94418777-b188-4dd7-8396-c904f0dfb186",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 48152.67,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "94418777-b188-4dd7-8396-c904f0dfb186-2",
+          "journal_entry_id": "94418777-b188-4dd7-8396-c904f0dfb186",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 48152.67,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "85623bd0-5253-42ce-a6f6-18a42ebebdb2",
+      "entry_number": "DEP-MID-BACK-MESH-CHAIR-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Mid Back Mesh chair \u2014 Aug 2026",
+      "reference": "DEPR-F06491",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "85623bd0-5253-42ce-a6f6-18a42ebebdb2-1",
+          "journal_entry_id": "85623bd0-5253-42ce-a6f6-18a42ebebdb2",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 47334.74,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "85623bd0-5253-42ce-a6f6-18a42ebebdb2-2",
+          "journal_entry_id": "85623bd0-5253-42ce-a6f6-18a42ebebdb2",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 47334.74,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "b1957d93-f940-46c0-989c-ca9aedca8df5",
+      "entry_number": "DEP-OFFICE-DESK-Jul 2026",
+      "date": "2026-07-01T00:00:00.000",
+      "description": "Depreciation: Office Desk \u2014 Jul 2026",
+      "reference": "DEPR-F64008",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "b1957d93-f940-46c0-989c-ca9aedca8df5-1",
+          "journal_entry_id": "b1957d93-f940-46c0-989c-ca9aedca8df5",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 19261.07,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "b1957d93-f940-46c0-989c-ca9aedca8df5-2",
+          "journal_entry_id": "b1957d93-f940-46c0-989c-ca9aedca8df5",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 19261.07,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-07-01T00:00:00.000",
+      "updated_at": "2026-07-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    },
+    {
+      "id": "b4dd8016-02b8-4fe2-81df-c4a15f431c54",
+      "entry_number": "DEP-OFFICE-DESK-Aug 2026",
+      "date": "2026-08-01T00:00:00.000",
+      "description": "Depreciation: Office Desk \u2014 Aug 2026",
+      "reference": "DEPR-F64008",
+      "status": "posted",
+      "lines": [
+        {
+          "id": "b4dd8016-02b8-4fe2-81df-c4a15f431c54-1",
+          "journal_entry_id": "b4dd8016-02b8-4fe2-81df-c4a15f431c54",
+          "account_id": "acct-143",
+          "account_name": "Depreciation",
+          "account_code": "143",
+          "debit": 18933.9,
+          "credit": 0,
+          "description": null
+        },
+        {
+          "id": "b4dd8016-02b8-4fe2-81df-c4a15f431c54-2",
+          "journal_entry_id": "b4dd8016-02b8-4fe2-81df-c4a15f431c54",
+          "account_id": "acct-159",
+          "account_name": "Less Accum. Depreciation \u2014 Office Furniture",
+          "account_code": "159",
+          "debit": 0,
+          "credit": 18933.9,
+          "description": null
+        }
+      ],
+      "notes": null,
+      "created_by": null,
+      "created_at": "2026-08-01T00:00:00.000",
+      "updated_at": "2026-08-01T00:00:00.000",
+      "sync_sequence": null,
+      "reverses_entry_id": null,
+      "reversed_by_id": null,
+      "recurring_template_id": null
+    }
+  ],
+  "scheduleUpdates": [
+    {
+      "id": "5acc4672-8274-4a36-b82c-cdb16853fc80",
+      "assetName": "Lenovo Thinkpad",
+      "expectedBadCurrentValue": 4017350.65,
+      "correctedCurrentValue": 3920449.08,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "0d876bf5-7ddd-4314-be83-dac6cbd7a067",
+      "assetName": "Printer",
+      "expectedBadCurrentValue": 966854.57,
+      "correctedCurrentValue": 917603.01,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "59b0ad3e-d2ad-47fe-b527-3671932b0ab4",
+      "assetName": "Thirdbooks Software",
+      "expectedBadCurrentValue": 3777191.23,
+      "correctedCurrentValue": 3674360.56,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "71d84c0d-d601-43ec-bd1e-296f4c7b765b",
+      "assetName": "HP Elitebook Laptop",
+      "expectedBadCurrentValue": 1401401.39,
+      "correctedCurrentValue": 1265584.72,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "081160a2-c1e3-42e6-ae46-bd25e31298e5",
+      "assetName": "Training Chair",
+      "expectedBadCurrentValue": 502764.38,
+      "correctedCurrentValue": 474813.23,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "fb5924b9-03a3-405e-aa83-018ee483966c",
+      "assetName": "Mid Back Mesh chair",
+      "expectedBadCurrentValue": 2900563.71,
+      "correctedCurrentValue": 2739307.11,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "8bb7914b-b39b-4965-9de7-e2b127574129",
+      "assetName": "4 Seater workstation",
+      "expectedBadCurrentValue": 2417136.42,
+      "correctedCurrentValue": 2282755.92,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "5e499af8-b692-42f4-9d10-09b3d1de33dc",
+      "assetName": "High Back Mesh chair",
+      "expectedBadCurrentValue": 676798.2,
+      "correctedCurrentValue": 639171.66,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "04fa1df0-d518-4087-be41-55c12ca0226f",
+      "assetName": "Reception Desk",
+      "expectedBadCurrentValue": 1740338.22,
+      "correctedCurrentValue": 1643584.27,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "17343d39-e0df-485b-9691-6378d98ae963",
+      "assetName": "Office Desk",
+      "expectedBadCurrentValue": 1160225.48,
+      "correctedCurrentValue": 1095722.84,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "401dbd58-a3f9-4d28-9d83-d1c2ddb376c0",
+      "assetName": "Office Partitions",
+      "expectedBadCurrentValue": 15187351.58,
+      "correctedCurrentValue": 14334694.82,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "230b7645-2710-40c4-829c-91215d3a74f2",
+      "assetName": "Air Conditioner",
+      "expectedBadCurrentValue": 2895729.44,
+      "correctedCurrentValue": 2727605.41,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    },
+    {
+      "id": "11bf35cd-1c43-4e51-8472-f955373467ff",
+      "assetName": "Access Control System",
+      "expectedBadCurrentValue": 1287850.29,
+      "correctedCurrentValue": 1198267.76,
+      "correctedLastRunDate": "2026-08-31T00:00:00.000"
+    }
+  ]
+}
